@@ -6,6 +6,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 from typing import List, Dict
+import uvicorn
 from langchain_core.runnables import Runnable
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -85,3 +86,7 @@ async def ask_question(request: ApiQueryRequest):
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))  # default for local dev
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
