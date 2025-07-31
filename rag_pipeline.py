@@ -8,18 +8,20 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain.retrievers import BM25Retriever, EnsembleRetriever
 
+
 def load_and_split_documents(doc_path):
     """Loads a PDF using Unstructured and splits it into chunks."""
     print(f"Loading document from path: {doc_path}...")
     # Use UnstructuredPDFLoader for better parsing of complex PDFs
     loader = UnstructuredPDFLoader(file_path=doc_path)
     documents = loader.load()
-            
+
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
     chunks = text_splitter.split_documents(documents)
-    
+
     print(f"Split document into {len(chunks)} chunks.")
     return chunks
+
 
 def create_vector_store(chunks):
     """Creates an in-memory Chroma vector store."""
@@ -29,9 +31,11 @@ def create_vector_store(chunks):
     print("In-memory vector store created successfully.")
     return vector_store
 
+
 def format_docs(docs):
     """Prepares retrieved documents for the prompt."""
     return "\n\n".join(doc.page_content for doc in docs)
+
 
 def create_rag_chain(chunks, vector_store, llm):
     """Builds the RAG chain using the EnsembleRetriever for Hybrid Search."""
@@ -46,7 +50,7 @@ def create_rag_chain(chunks, vector_store, llm):
         retrievers=[bm25_retriever, chroma_retriever],
         weights=[0.5, 0.5]
     )
-    
+
     template = """
 System Prompt
 You are an expert AI assistant specializing in interpreting insurance policy documents. Your primary goal is to answer user questions accurately and concisely based only on the provided context.
@@ -92,11 +96,11 @@ ANSWER:
     output_parser = StrOutputParser()
 
     rag_chain = (
-        {"context": ensemble_retriever | format_docs, "question": RunnablePassthrough()}
-        | prompt
-        | llm
-        | output_parser
+            {"context": ensemble_retriever | format_docs, "question": RunnablePassthrough()}
+            | prompt
+            | llm
+            | output_parser
     )
-    
+
     print("Ensemble RAG chain created.")
     return rag_chain

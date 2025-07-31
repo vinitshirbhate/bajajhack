@@ -3,10 +3,10 @@ import requests
 import tempfile
 import asyncio
 from fastapi import FastAPI, HTTPException
+import uvicorn
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 from typing import List, Dict
-import uvicorn
 from langchain_core.runnables import Runnable
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -71,7 +71,7 @@ def get_or_create_rag_chain(doc_url: str) -> Runnable:
             os.remove(temp_file_path)
 
 
-@app.post("/api/v2/hackrx/run", response_model=ApiResponse)
+@app.post("/api/v1/hackrx/run", response_model=ApiResponse)
 async def ask_question(request: ApiQueryRequest):
     """Processes questions concurrently using a cached or newly created RAG chain."""
     try:
